@@ -4,6 +4,8 @@
 #include <vector>
 #include <chrono>
 
+//#define DEBUG
+
 /* template T
    class vec
    {
@@ -29,8 +31,15 @@ void swap(int* a, int* b)
 
 void dump(const std::vector<int> & data)
 {
-    for (auto v:data) std::cout<< v <<" ";
+#ifdef DEBUG
+    int i=0;
+    for (auto v:data) {
+        if ((i % 10) == 0) std::cout<<std::endl;
+        std::cout<< v <<" ";
+        ++i;
+    }
     std::cout<<std::endl;
+#endif
 }
 
 int Partition(std::vector<int> & data, int low, int high)
@@ -81,8 +90,7 @@ void bench(void (*f)(std::vector<int> &, int , int ), std::vector<int> &v)
     std::chrono::duration<double> elapsed_seconds = end-start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     dump(v);
-    //std::cout << "Finished computation at " << std::ctime(&end_time)
-    //<< "elapsed time: " << elapsed_seconds.count() << "s\n";
+    std::cout << "Finished computation at " << std::ctime(&end_time) << "elapsed time: " << elapsed_seconds.count() << "s\n";
 }
 
 static std::vector<int> generate_data(size_t size)
@@ -95,13 +103,22 @@ static std::vector<int> generate_data(size_t size)
     return data;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    size_t vec_size = 10;
+    if (argc == 2) {
+        vec_size = atoi(argv[1]);
+    } else if (argc > 2) {
+        std::cout<<"Usage:"<<std::endl<<"      "<<argv[0] << " <size>"<<std::endl;
+        exit(1);
+    }
     //std::vector<int> v({ 6, 4, 9, 10,  50, 48, 35, 56, 1, 5, 2, 90, 100 });
-    std::vector<int> v(generate_data(100));
+    std::vector<int> v(generate_data(vec_size));
     std::vector<int> v1(v);
 
+    std::cout<<std::endl<<"QuickSort implementation (size: "<<vec_size<<"): "<<std::endl;
     bench(&QuickSort, v);
+    std::cout<<std::endl<<"std::sort implementation (size: "<<vec_size<<"): "<<std::endl;
     bench(&StdSort, v1);
 
     std::cout<<"Exit"<<std::endl;
